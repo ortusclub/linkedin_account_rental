@@ -1,0 +1,9 @@
+{
+  "name": "@linkedin-rental/fingerprint-extension",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc && cp src/manifest.json dist/",
+    "dev": "tsc --watch"
+  }
+}

@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  plan        String   @default("free")
+  maxAccounts Int      @default(5) @map("max_accounts")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  users    User[]
+  accounts LinkedInAccount[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  orgId        String   @map("org_id") @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("member")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  org         Organization        @relation(fields: [orgId], references: [id])
+  assignments AccountAssignment[]
+  sessions    BrowserSession[]
+
+  @@index([orgId])
+  @@map("users")
+}
+
+model LinkedInAccount {
+  id            String   @id @default(uuid()) @db.Uuid
+  orgId         String   @map("org_id") @db.Uuid
+  displayName   String   @map("display_name")
+  linkedinEmail String?  @map("linkedin_email")
+  status        String   @default("active")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  org          Organization        @relation(fields: [orgId], references: [id])
+  profile      BrowserProfile?
+  assignments  AccountAssignment[]
+  sessions     BrowserSession[]
+
+  @@index([orgId])
+  @@map("linkedin_accounts")
+}
+
+model BrowserProfile {
+  id                  String   @id @default(uuid()) @db.Uuid
+  accountId           String   @unique @map("account_id") @db.Uuid
+  fingerprint         Json     @default("{}")
+  proxyType           String?  @map("proxy_type")
+  proxyHost           String?  @map("proxy_host")
+  proxyPort           Int?     @map("proxy_port")
+  proxyUser           String?  @map("proxy_user")
+  proxyPass           String?  @map("proxy_pass")
+  profileS3Key        String?  @map("profile_s3_key")
+  profileSizeMb       Float?   @map("profile_size_mb")
+  installedExtensions Json     @default("[]") @map("installed_extensions")
+  lastLaunched        DateTime? @map("last_launched") @db.Timestamptz
+  lastSynced          DateTime? @map("last_synced") @db.Timestamptz
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  account LinkedInAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("browser_profiles")
+}
+
+model AccountAssignment {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  accountId  String   @map("account_id") @db.Uuid
+  permission String   @default("use")
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account LinkedInAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, accountId])
+  @@index([userId])
+  @@index([accountId])
+  @@map("account_assignments")
+}
+
+model BrowserSession {
+  id        String    @id @default(uuid()) @db.Uuid
+  accountId String    @map("account_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  startedAt DateTime  @default(now()) @map("started_at") @db.Timestamptz
+  endedAt   DateTime? @map("ended_at") @db.Timestamptz
+  ipAddress String?   @map("ip_address")
+  status    String    @default("running")
+
+  account LinkedInAccount @relation(fields: [accountId], references: [id])
+  user    User            @relation(fields: [userId], references: [id])
+
+  @@index([accountId])
+  @@map("browser_sessions")
+}

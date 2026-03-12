@@ -1,0 +1,35 @@
+{
+  "name": "@linkedin-rental/agent",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "package": "electron-builder"
+  },
+  "dependencies": {
+    "@linkedin-rental/shared": "*",
+    "electron-store": "^8.1.0",
+    "tar": "^6.2.0"
+  },
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.0",
+    "electron-vite": "^2.0.0"
+  },
+  "build": {
+    "appId": "com.linkedin-rental.agent",
+    "productName": "LinkedIn Account Manager",
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.business"
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"]
+    }
+  }
+}
