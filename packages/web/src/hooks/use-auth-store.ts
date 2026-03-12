@@ -15,7 +15,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: async (email, password) => {
     const res = await api.post('/auth/login', { email, password })
-    const { accessToken, refreshToken, user } = res.data.data
+    const { accessToken, refreshToken, user } = res.data
     localStorage.setItem('accessToken', accessToken)
     localStorage.setItem('refreshToken', refreshToken)
     localStorage.setItem('user', JSON.stringify(user))
@@ -24,7 +24,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   register: async (email, password, orgName) => {
     const res = await api.post('/auth/register', { email, password, orgName })
-    const { accessToken, refreshToken, user } = res.data.data
+    const { accessToken, refreshToken, user } = res.data
     localStorage.setItem('accessToken', accessToken)
     localStorage.setItem('refreshToken', refreshToken)
     localStorage.setItem('user', JSON.stringify(user))
